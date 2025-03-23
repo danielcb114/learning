@@ -1,0 +1,31 @@
+# Add to vpc-config.yaml
+- name: dev-allow-all
+  type: compute.v1.firewall
+  properties:
+    network: $(ref.my-vpc.selfLink)
+    allowed:
+    - IPProtocol: tcp
+      ports: ["22", "80", "443"]  # SSH, HTTP, HTTPS
+    - IPProtocol: udp
+    sourceRanges: ["0.0.0.0/0"]   # Open to all (dev is lax)
+    targetTags: ["dev-server"]
+
+- name: prod-allow-restricted
+  type: compute.v1.firewall
+  properties:
+    network: $(ref.my-vpc.selfLink)
+    allowed:
+    - IPProtocol: tcp
+      ports: ["80", "443"]        # Only HTTP/HTTPS, no SSH
+    sourceRanges: ["203.0.113.0/24"]  # Replace with your trusted IP range
+    targetTags: ["prod-server"]
+
+- name: prod-deny-all
+  type: compute.v1.firewall
+  properties:
+    network: $(ref.my-vpc.selfLink)
+    denied:
+    - IPProtocol: all
+    sourceRanges: ["0.0.0.0/0"]
+    priority: 65534              # Low priority to act as a catch-all deny
+    targetTags: ["prod-server"]
