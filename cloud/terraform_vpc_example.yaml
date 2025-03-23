@@ -1,0 +1,20 @@
+# vpc-config.yaml
+resources:
+- name: my-vpc
+  type: compute.v1.network
+  properties:
+    autoCreateSubnetworks: false  # Custom mode VPC
+
+- name: dev-subnet
+  type: compute.v1.subnetwork
+  properties:
+    network: $(ref.my-vpc.selfLink)
+    ipCidrRange: 10.0.1.0/24
+    region: us-central1
+
+- name: prod-subnet
+  type: compute.v1.subnetwork
+  properties:
+    network: $(ref.my-vpc.selfLink)
+    ipCidrRange: 10.0.2.0/24
+    region: us-central1
