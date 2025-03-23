@@ -1,0 +1,37 @@
+name: Deploy to GCP
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'dev.yaml'
+      - 'prod.yaml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          project_id: my-project-id
+          export_default_credentials: true
+
+      - name: Deploy Dev
+        if: contains(github.event.head_commit.modified, 'dev.yaml')
+        run: |
+          gcloud deployment-manager deployments update dev-deployment \
+            --config dev.yaml \
+            --project my-project-id
+
+      - name: Deploy Prod
+        if: contains(github.event.head_commit.modified, 'prod.yaml')
+        run: |
+          gcloud deployment-manager deployments update prod-deployment \
+            --config prod.yaml \
+            --project my-project-id
